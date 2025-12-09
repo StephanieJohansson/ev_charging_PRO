@@ -24,7 +24,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // allow anonymous resource requests aka you dont need to login to access them
-                        .requestMatchers("/auth/register", "/auth/login" , "/stations/**").permitAll()
+                        .requestMatchers("/auth/register", "/auth/login" , "/stations/**", "/sim").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

@@ -8,6 +8,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+
+// service to load user-specific data during authentication.
+// This class is used by Spring Security to load user data when authenticating a user.
+// Helps JwTFilter to validate that the user trying to use the API is who they say they are and exists in database
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

@@ -22,27 +22,36 @@ public class DataSeeder {
     public void init() {
         if (stationRepository.count() == 0){
             stationRepository.save(Station.builder()
-                    .location("Söderhamn")
-                    .totalPlugs(6)
-                    .avgChargeSeed(22)
+                    .location("Söderhamn Supercharger")
+                    .totalPlugs(20) //tesla
+                    .avgChargeSeed(150) //150kW is standard to V2/V3
                     .currentQueue(0)
                     .estimatedWaitTime(0)
                     .build());
 
-            // add more stations
+            // dummy station with fewer plugs and lower average charge seed
             stationRepository.save(Station.builder()
-                    .location("Bollnäs")
-                    .totalPlugs(8)
-                    .avgChargeSeed(50)
-                    .currentQueue(0)
-                    .estimatedWaitTime(0)
-                    .build());
-
-            // add more stations
-            stationRepository.save(Station.builder()
-                    .location("Hudiksvall")
+                    .location("Bollnäs centrum")
                     .totalPlugs(4)
-                    .avgChargeSeed(11)
+                    .avgChargeSeed(22) // 22 kW AC-charger
+                    .currentQueue(0)
+                    .estimatedWaitTime(0)
+                    .build());
+
+            // dummy station, one or two fast chargers
+            stationRepository.save(Station.builder()
+                    .location("Hudiksvall Cirkel K")
+                    .totalPlugs(6)
+                    .avgChargeSeed(50) // 50 kW DC-charger
+                    .currentQueue(0)
+                    .estimatedWaitTime(0)
+                    .build());
+
+            // dummy station, HPC - higher power charging among E4 road
+            stationRepository.save(Station.builder()
+                    .location("Ionity Hudiksvall")
+                    .totalPlugs(6)
+                    .avgChargeSeed(350)  // 350 kW - Supercharger
                     .currentQueue(0)
                     .estimatedWaitTime(0)
                     .build());
