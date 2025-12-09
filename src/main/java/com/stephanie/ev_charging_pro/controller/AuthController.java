@@ -29,4 +29,10 @@ public class AuthController {
     public AuthResponse login(@RequestBody LoginRequest loginRequest) {
         return authService.login(loginRequest);
     }
+
+    // exception handling for bad request
+    @ExceptionHandler (IllegalArgumentException.class)
+    public String handleIllegalArgumentException(IllegalArgumentException e){
+        return e.getMessage();
+    }
 }
