@@ -4,6 +4,7 @@ package com.stephanie.ev_charging_pro.service;
 import com.stephanie.ev_charging_pro.dto.AuthResponse;
 import com.stephanie.ev_charging_pro.dto.LoginRequest;
 import com.stephanie.ev_charging_pro.dto.RegisterRequest;
+import com.stephanie.ev_charging_pro.model.Role;
 import com.stephanie.ev_charging_pro.model.User;
 import com.stephanie.ev_charging_pro.repository.UserRepository;
 import com.stephanie.ev_charging_pro.security.JwtService;
@@ -33,11 +34,12 @@ public class AuthService {
                 .username(registerRequest.getName())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .role(Role.USER)
                 .build();
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user);
 
         return new AuthResponse(token);
     }
@@ -52,7 +54,7 @@ public class AuthService {
         }
 
 
-        String token = jwtService.generateToken(user.getEmail());
+        String token = jwtService.generateToken(user);
 
         return new AuthResponse(token);
     }

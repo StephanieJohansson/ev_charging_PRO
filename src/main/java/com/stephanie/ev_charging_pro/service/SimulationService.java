@@ -45,7 +45,7 @@ public class SimulationService {
     }
 
 // calculate mu based on station power, base service minutes and temperature
-    private double calculateMu(double powerKw, double baseMinutes, double tempC) {
+    public double calculateMu(double powerKw, double baseMinutes, double tempC) {
 
         // Temperature effect
         if (tempC < 0) baseMinutes *= 1.3;
@@ -58,7 +58,7 @@ public class SimulationService {
     }
 
     // M/M/1 queue model
-    private SimulationResponse mm1(double lambda, double mu) {
+    public SimulationResponse mm1(double lambda, double mu) {
 
         SimulationResponse r = new SimulationResponse();
 

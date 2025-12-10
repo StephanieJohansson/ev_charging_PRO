@@ -6,7 +6,12 @@ import com.stephanie.ev_charging_pro.dto.SimulationResponse;
 import com.stephanie.ev_charging_pro.dto.StationDTO;
 import com.stephanie.ev_charging_pro.model.Station;
 import com.stephanie.ev_charging_pro.repository.StationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import com.stephanie.ev_charging_pro.exception.BadRequestException;
+import com.stephanie.ev_charging_pro.exception.NotFoundException;
+
+
 
 import java.time.LocalTime;
 import java.util.List;
@@ -59,8 +64,8 @@ public class StationService {
         // Overload handler
         // check if waitTime is extreamly high or infinit
         if (Double.isInfinite(res.getWq()) || res.getWq() > 1000) {
-            station.setEstimatedWaitTime(999); // Kod för "Jättelång väntetid"
-            station.setCurrentQueue(99);       // Kod för "Fullt"
+            station.setEstimatedWaitTime(999); // code for super long wait time
+            station.setCurrentQueue(99);       // code for "full"
         } else {
             // convert waitTime to minutes
             // res.getWq() is in hours, * 60 to get minutes
@@ -75,6 +80,18 @@ public class StationService {
 
     public Station createStation(StationDTO stationDTO){
 
+        if (stationDTO.getLocation() == null || stationDTO.getLocation().isBlank()) {
+            throw new BadRequestException("Location is required");
+        }
+
+        if (stationDTO.getTotalPlugs() <= 4) {
+            throw new BadRequestException("totalPlugs must be greater than 4");
+        }
+
+        if (stationDTO.getAvgChargeSeed() <= 10) {
+            throw new BadRequestException("avgChargeSeed must be greater than 11");
+        }
+
         Station station = Station.builder()
                 .location(stationDTO.getLocation())
                 .totalPlugs(stationDTO.getTotalPlugs())
@@ -84,5 +101,34 @@ public class StationService {
                 .build();
 
         return stationRepository.save(station);
+    }
+
+
+    public Station getStationById(Long id) {
+        return stationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Station with ID " + id + " not found"));
+    }
+
+    // Method to delete a station
+    public void deleteStation(Long id) {
+        if (!stationRepository.existsById(id)) {
+            throw new EntityNotFoundException("Station not found with id: " + id);
+        }
+        stationRepository.deleteById(id);
+    }
+
+    // method to update station
+    public Station updateStation(Long id, StationDTO stationDTO) {
+        // get existing station from database if exist or else throw exception
+        Station existingStation = stationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Station not found with id: " + id));
+
+        // update field with new values from DTO
+        existingStation.setLocation(stationDTO.getLocation());
+        existingStation.setTotalPlugs(stationDTO.getTotalPlugs());
+        existingStation.setAvgChargeSeed(stationDTO.getAvgChargeSeed());
+
+
+        return stationRepository.save(existingStation);
     }
 }

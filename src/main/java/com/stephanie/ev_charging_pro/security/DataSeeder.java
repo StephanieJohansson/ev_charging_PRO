@@ -1,9 +1,13 @@
 package com.stephanie.ev_charging_pro.security;
 
 
+import com.stephanie.ev_charging_pro.model.Role;
 import com.stephanie.ev_charging_pro.model.Station;
+import com.stephanie.ev_charging_pro.model.User;
 import com.stephanie.ev_charging_pro.repository.StationRepository;
+import com.stephanie.ev_charging_pro.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 
@@ -12,9 +16,13 @@ import org.springframework.stereotype.Component;
 public class DataSeeder {
 
     private final StationRepository stationRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataSeeder(StationRepository stationRepository) {
+    public DataSeeder(StationRepository stationRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.stationRepository = stationRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // postConstruct method to seed the database
@@ -55,6 +63,18 @@ public class DataSeeder {
                     .currentQueue(0)
                     .estimatedWaitTime(0)
                     .build());
+        }
+        // 2. Seed Admin User
+        if (userRepository.count() == 0) {
+            // create admin user
+            User admin = User.builder()
+                    .username("Admin")
+                    .email("admin@mail.com")
+                    .password(passwordEncoder.encode("admin123"))
+                    .role(Role.ADMIN)
+                    .build();
+
+            userRepository.save(admin);
         }
     }
 }

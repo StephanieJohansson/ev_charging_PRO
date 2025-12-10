@@ -13,6 +13,9 @@ import lombok.*;
 @Builder
 public class User {
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
