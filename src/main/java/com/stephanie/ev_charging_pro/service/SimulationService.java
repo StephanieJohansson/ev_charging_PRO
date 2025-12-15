@@ -27,6 +27,11 @@ public class SimulationService {
         return res;
     }
 
+    public SimulationResponse getLastSimulation() {
+        // Placeholder for retrieving the last simulation
+        return new SimulationResponse();
+    }
+
     // calculate lambda based on traffic level and hour of day
     private double calculateLambda(String traffic, int hour) {
 
