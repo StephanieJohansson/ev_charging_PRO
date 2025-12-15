@@ -8,7 +8,16 @@ Backend: Spring Boot + MySQL. Frontend: React.
 
 # POSTMAN
 
+To POST login as admin(/auth/login):
+
+{
+  "email": "admin@mail.com",
+  "password": "admin123"
+}
+
+
 To POST register a new user(auth/register):
+
 {
   "name": "Jane Doe"
   "email": "Jane@email.com",
@@ -16,6 +25,7 @@ To POST register a new user(auth/register):
 }
 
 To POST a car logged in as a user (/vehicles):
+
 {
   "brand": "Tesla",
   "model": "Model 3",
