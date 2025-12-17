@@ -15,10 +15,12 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
+    private final VehicleSpecResolver vehicleSpecResolver;
 
-    public VehicleService(VehicleRepository vehicleRepository, UserRepository userRepository) {
+    public VehicleService(VehicleRepository vehicleRepository, UserRepository userRepository, VehicleSpecResolver vehicleSpecResolver) {
         this.vehicleRepository = vehicleRepository;
         this.userRepository = userRepository;
+        this.vehicleSpecResolver = vehicleSpecResolver;
     }
 
     private User getCurrentUser(){
@@ -37,12 +39,19 @@ public class VehicleService {
 
         User user = getCurrentUser();
 
+        double batteryCapacity =
+                req.getBatteryCapacity() != null && req.getBatteryCapacity() > 0
+                        ? req.getBatteryCapacity()
+                        : vehicleSpecResolver.resolveBatteryCapacity(
+                        req.getBrand(),
+                        req.getModel()
+                );
 
         Vehicle vehicle = Vehicle.builder()
-                .model(req.getModel())
                 .brand(req.getBrand())
+                .model(req.getModel())
                 .plateNumber(req.getPlateNumber())
-                .batteryCapacity(req.getBatteryCapacity())
+                .batteryCapacity(batteryCapacity)
                 .owner(user)
                 .currentBatteryLevel(50)
                 .build();

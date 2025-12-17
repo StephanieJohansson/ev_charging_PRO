@@ -20,7 +20,7 @@ public class Vehicle {
     private String model;
     private String plateNumber;
 
-    private int batteryCapacity;
+    private double batteryCapacity;
     private int currentBatteryLevel;
 
     @ManyToOne

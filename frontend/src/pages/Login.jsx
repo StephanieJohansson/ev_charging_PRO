@@ -35,6 +35,9 @@ export default function Login() {
             <button>Login</button>
         </form>
     );
+    <p>
+        No account yet? <a href="/register">Register here</a>
+    </p>
 }
 
 
