@@ -13,6 +13,11 @@ api.interceptors.request.use(config => {
         config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
-})
+});
+
+export const getMyVehicles = async () => {
+    const res = await api.get('/vehicles');
+    return res.data;
+}
 
 export default api;
