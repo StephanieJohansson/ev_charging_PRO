@@ -9,6 +9,9 @@ export default function ChargeForm({ vehicles }) {
     const [start, setStart] = useState(20);
     const [end, setEnd] = useState(80);
     const [result, setResult] = useState(null);
+    const [previewResult, setPreviewResult] = useState(null);
+    const [chargingStarted, setChargingStarted] = useState(false);
+
 
     useEffect(() => {
         api.get("/stations").then(res => setStations(res.data));
@@ -23,7 +26,23 @@ export default function ChargeForm({ vehicles }) {
                 startPercentage: start,
                 endPercentage: end
             })
-            .then(res => setResult(res.data));
+            .then(res => setPreviewResult(res.data));
+    };
+
+    const startCharging = () => {
+        api.post("/charging/start", {
+            vehicleId,
+            stationId,
+            startPercentage: start,
+            endPercentage: end
+        })
+            .then(() => {
+                setChargingStarted(true);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Could not start charging");
+            });
     };
 
     return (
@@ -64,11 +83,31 @@ export default function ChargeForm({ vehicles }) {
                 <button>Estimate charging</button>
             </form>
 
-            {result && (
-                <div>
-                    <p>Queue time: {result.queueTimeMinutes} min</p>
-                    <p>Charging time: {result.chargingTimeMinutes} min</p>
-                    <p>Total: {result.totalTimeMinutes} min</p>
+            {previewResult && (
+                <div style={{ marginTop: "12px" }}>
+                    <p>Queue time: {previewResult.queueMinutes} min</p>
+                    <p>Charging time: {previewResult.chargingMinutes} min</p>
+                    <p>
+                        <strong>
+                            Total: {previewResult.totalMinutes} min
+                        </strong>
+                    </p>
+
+                    {!chargingStarted && (
+                        <button
+                            style={{ marginTop: "12px" }}
+                            type="button"
+                            onClick={startCharging}
+                        >
+                            🔌 Start charging
+                        </button>
+                    )}
+
+                    {chargingStarted && (
+                        <p style={{ marginTop: "12px" }}>
+                            ✅ Charging started
+                        </p>
+                    )}
                 </div>
             )}
         </div>

@@ -6,6 +6,7 @@ import com.stephanie.ev_charging_pro.dto.LoginRequest;
 import com.stephanie.ev_charging_pro.dto.RegisterRequest;
 import com.stephanie.ev_charging_pro.model.Role;
 import com.stephanie.ev_charging_pro.model.User;
+import com.stephanie.ev_charging_pro.repository.ChargingSessionRepository;
 import com.stephanie.ev_charging_pro.repository.UserRepository;
 import com.stephanie.ev_charging_pro.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +18,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
