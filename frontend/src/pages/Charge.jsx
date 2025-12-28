@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import ChargeForm from "../components/ChargeForm";
 
 export default function Dashboard() {
     const [vehicles, setVehicles] = useState([]);
@@ -151,13 +150,6 @@ export default function Dashboard() {
                     {submitting ? "Adding..." : "Add vehicle"}
                 </button>
             </form>
-
-            <hr style={{ margin: "30px 0" }} />
-
-            <h3>Charge vehicle</h3>
-
-            <ChargeForm vehicles={vehicles} />
-
         </div>
     );
 }
