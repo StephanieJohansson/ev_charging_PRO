@@ -6,6 +6,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+
     // form state
     const [brand, setBrand] = useState("");
     const [model, setModel] = useState("");

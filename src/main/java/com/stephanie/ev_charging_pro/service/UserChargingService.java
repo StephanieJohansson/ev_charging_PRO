@@ -8,6 +8,7 @@ import com.stephanie.ev_charging_pro.model.User;
 import com.stephanie.ev_charging_pro.model.Vehicle;
 import com.stephanie.ev_charging_pro.repository.ChargingSessionRepository;
 import com.stephanie.ev_charging_pro.repository.StationRepository;
+import com.stephanie.ev_charging_pro.repository.UserRepository;
 import com.stephanie.ev_charging_pro.repository.VehicleRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,15 +27,21 @@ public class UserChargingService {
     private final ChargingSessionRepository chargingSessionRepository;
     private final VehicleRepository vehicleRepository;
     private final StationRepository stationRepository;
+    private final UserRepository userRepository;
 
 
-    public UserChargingService(SimulationService simulationService, VehicleRepository vehicleRepository, ChargingTimeCalculator chargingTimeCalculator,
-                               ChargingSessionRepository chargingSessionRepository, StationRepository stationRepository) {
+    public UserChargingService(SimulationService simulationService,
+                               UserRepository userRepository,
+                               VehicleRepository vehicleRepository,
+                               ChargingTimeCalculator chargingTimeCalculator,
+                               ChargingSessionRepository chargingSessionRepository,
+                               StationRepository stationRepository) {
         this.simulationService = simulationService;
         this.chargingTimeCalculator = chargingTimeCalculator;
         this.chargingSessionRepository = chargingSessionRepository;
         this.vehicleRepository = vehicleRepository;
         this.stationRepository = stationRepository;
+        this.userRepository = userRepository;
 
     }
 
@@ -81,11 +88,16 @@ public class UserChargingService {
     }
 
     // Helper method to get the currently authenticated user
-    private User getCurrentUser(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (User) authentication.getPrincipal();
+    private User getCurrentUser() {
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
     }
+
 
 
     public ChargingSession startCharging(StartChargingRequest request) {

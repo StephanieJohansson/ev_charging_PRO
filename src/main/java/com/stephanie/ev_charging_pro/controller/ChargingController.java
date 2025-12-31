@@ -1,9 +1,12 @@
 package com.stephanie.ev_charging_pro.controller;
 
 
+import com.stephanie.ev_charging_pro.dto.StartChargingRequest;
+import com.stephanie.ev_charging_pro.dto.StopChargingRequest;
 import com.stephanie.ev_charging_pro.dto.UserChargeRequest;
 import com.stephanie.ev_charging_pro.dto.UserChargeResponse;
 import com.stephanie.ev_charging_pro.exception.BadRequestException;
+import com.stephanie.ev_charging_pro.model.ChargingSession;
 import com.stephanie.ev_charging_pro.model.Station;
 import com.stephanie.ev_charging_pro.model.User;
 import com.stephanie.ev_charging_pro.model.Vehicle;
@@ -85,6 +88,17 @@ public class ChargingController {
                 request.getStartPercentage(),
                 request.getEndPercentage()
         );
+
     }
+    @PostMapping("/start")
+    public ChargingSession startCharging(@RequestBody StartChargingRequest request) {
+        return userChargingService.startCharging(request);
+    }
+
+    @PostMapping("/stop")
+    public ChargingSession stopCharging(@RequestBody StopChargingRequest request) {
+        return userChargingService.stopCharging(request);
+    }
+
 }
 
