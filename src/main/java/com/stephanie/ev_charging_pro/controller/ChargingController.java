@@ -100,5 +100,11 @@ public class ChargingController {
         return userChargingService.stopCharging(request);
     }
 
+    @GetMapping("/active")
+    public ChargingSession getActiveChargingSession() {
+        return userChargingService.getActiveSession();
+    }
+
+
 }
 

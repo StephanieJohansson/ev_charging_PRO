@@ -106,7 +106,7 @@ public class UserChargingService {
 
         // block multiple active sessions
         chargingSessionRepository
-                .findByUserAndEndTimeIsNull(user)
+                .findByUserIdAndEndTimeIsNull(user.getId())
                 .ifPresent(s -> {
                     throw new IllegalStateException("Charging already in progress");
                 });
@@ -129,9 +129,6 @@ public class UserChargingService {
 
         return chargingSessionRepository.save(session);
     }
-
-
-
 
 
     public ChargingSession stopCharging(StopChargingRequest request) {
@@ -161,6 +158,19 @@ public class UserChargingService {
         session.setDurationMinutes(durationMinutes);
 
         return chargingSessionRepository.save(session);
+    }
+
+    public ChargingSession getActiveSession() {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow();
+
+        return chargingSessionRepository
+                .findByUserIdAndEndTimeIsNull(user.getId())
+                .orElse(null);
     }
 
 
