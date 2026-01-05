@@ -51,11 +51,13 @@ public class UserChargingService {
             Station station,
             int startPercentage,
             int endPercentage
-    ){
-        double batteryKWh = vehicle.getBatteryCapacity();
-        double neededKWh = batteryKWh * (endPercentage - startPercentage) / 100.0;
+    ) {
 
-        double chargingHours = neededKWh / station.getAvgChargeSeed();
+        double batteryKWh = vehicle.getBatteryCapacity();
+        double estimatedEnergyKWh =
+                batteryKWh * (endPercentage - startPercentage) / 100.0;
+
+
         double chargingMinutes =
                 chargingTimeCalculator.calculateChargingMinutes(
                         vehicle,
@@ -66,26 +68,37 @@ public class UserChargingService {
 
 
         SimulationRequest queueRequest = new SimulationRequest();
-
         queueRequest.setStationPowerKw(station.getAvgChargeSeed());
         queueRequest.setConnectors(station.getTotalPlugs());
         queueRequest.setBaseServiceMinutes(chargingMinutes);
         queueRequest.setHourOfDay(LocalTime.now().getHour());
-        queueRequest.setTrafficLevel("medium"); // for simplicity, I use medium traffic level
+        queueRequest.setTrafficLevel("medium");
         queueRequest.setTemperatureC(10);
 
+        SimulationResponse simulationResponse =
+                simulationService.simulate(queueRequest);
 
-        SimulationResponse simulationResponse = simulationService.simulate(queueRequest);
+        double queueMinutes =
+                Double.isFinite(simulationResponse.getWq())
+                        ? simulationResponse.getWq() * 60
+                        : 10;
 
-      double queueMinutes = 10;
 
+        double pricePerKWh = station.getPricePerKWh();
+
+        if (pricePerKWh <= 0) {
+            throw new IllegalStateException("Station price not set");
+        }
+
+        double estimatedCost = estimatedEnergyKWh * pricePerKWh;
 
         return new UserChargeResponse(
                 queueMinutes,
                 chargingMinutes,
-                queueMinutes + chargingMinutes
+                queueMinutes + chargingMinutes,
+                estimatedEnergyKWh,
+                estimatedCost
         );
-
     }
 
     // Helper method to get the currently authenticated user

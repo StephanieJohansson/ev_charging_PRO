@@ -13,5 +13,8 @@ public class UserChargeResponse {
     private double chargingTimeMinutes;
     private double totalTimeMinutes;
 
+    private double estimatedCost;
+    private double estimatedEnergyKWh;
+
 
 }

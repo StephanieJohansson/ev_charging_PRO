@@ -202,6 +202,8 @@ export default function ChargeForm({ vehicles }) {
                     <p>Queue: {preview.queueTimeMinutes} min</p>
                     <p>Charging: {preview.chargingTimeMinutes} min</p>
                     <strong>Total: {preview.totalTimeMinutes} min</strong>
+                    <p>⚡ Estimated energy: {preview.estimatedEnergyKWh.toFixed(2)} kWh</p>
+                    <p>💰 Estimated cost: {preview.estimatedCost.toFixed(2)} kr</p>
                     <br />
                     <button onClick={startCharging}>🔌 Start charging</button>
                 </>
@@ -272,7 +274,7 @@ export default function ChargeForm({ vehicles }) {
                                 {new Date(session.endTime).toLocaleString()}
                                 <br />
 
-                                ⏱️ {session.durationMinutes} min
+                                Duration: {session.durationMinutes} min
                             </li>
                         ))}
                     </ul>
