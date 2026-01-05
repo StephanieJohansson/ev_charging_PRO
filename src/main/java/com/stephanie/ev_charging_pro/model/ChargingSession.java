@@ -31,6 +31,7 @@ public class ChargingSession {
 
     private double energyKWh;
     private double durationMinutes;
+    private double totalCost;
 
     @ManyToOne
     private User user;

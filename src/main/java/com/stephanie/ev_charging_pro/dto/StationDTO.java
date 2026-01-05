@@ -7,4 +7,5 @@ public class StationDTO {
     private String location;
     private int totalPlugs;
     private double avgChargeSeed;
+    private double pricePerKWh;
 }

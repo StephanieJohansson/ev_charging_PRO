@@ -20,6 +20,15 @@ export default function ChargeForm({ vehicles }) {
 
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showComplete, setShowComplete] = useState(false);
+
+    const isComplete =
+        currentPercentage !== null &&
+        activeSession &&
+        currentPercentage >= activeSession.endPercentage;
+
+
+    const [history, setHistory] = useState( [])
 
     /* ---------------- LOAD DATA ---------------- */
 
@@ -30,6 +39,15 @@ export default function ChargeForm({ vehicles }) {
             .then(res => setActiveSession(res.data))
             .catch(() => {});
     }, []);
+
+    /* ---------------- LOAD CHARGING HISTORY ---------------- */
+
+    useEffect(() => {
+        api.get("/charging/history")
+            .then(res => setHistory(res.data))
+            .catch(() => {});
+    }, []);
+
 
     /* ---- If active session but no estimate (refresh) ---- */
     useEffect(() => {
@@ -55,7 +73,7 @@ export default function ChargeForm({ vehicles }) {
 
         let elapsed = 0;
 
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             elapsed += TIME_SCALE;
 
             const ratio = Math.min(elapsed / estimatedMinutes, 1);
@@ -67,11 +85,36 @@ export default function ChargeForm({ vehicles }) {
                 Math.max(0, Math.round(estimatedMinutes - elapsed))
             );
 
-            if (ratio >= 1) clearInterval(interval);
+            // ⭐ AUTO STOP
+            if (ratio >= 1) {
+                clearInterval(interval);
+
+                // Visa "Charging complete"
+                setShowComplete(true);
+
+                await api.post("/charging/stop", {
+                    sessionId: activeSession.id,
+                    endPercentage: endPct
+                });
+
+                // refresh history
+                const historyRes = await api.get("/charging/history");
+                setHistory(historyRes.data);
+
+                // let user see the message for a bit before clearing it
+                setTimeout(() => {
+                    setShowComplete(false);
+                    setActiveSession(null);
+                    setEstimatedMinutes(null);
+                    setCurrentPercentage(null);
+                    setRemainingMinutes(null);
+                }, 2000);
+            }
         }, TICK_MS);
 
         return () => clearInterval(interval);
     }, [activeSession, estimatedMinutes]);
+
 
     /* ---------------- ACTIONS ---------------- */
 
@@ -113,6 +156,9 @@ export default function ChargeForm({ vehicles }) {
             sessionId: activeSession.id,
             endPercentage: currentPercentage ?? end
         });
+        api.get("/charging/history")
+            .then(res => setHistory(res.data));
+
 
         setActiveSession(null);
         setEstimatedMinutes(null);
@@ -161,7 +207,8 @@ export default function ChargeForm({ vehicles }) {
                 </>
             )}
 
-            {activeSession && (
+            {/* 🔋 ACTIVE CHARGING */}
+            {activeSession && !showComplete && (
                 <>
                     <p>🔋 Charging in progress</p>
 
@@ -172,7 +219,7 @@ export default function ChargeForm({ vehicles }) {
                     />
 
                     <p>
-                        {currentPercentage ?? activeSession.startPercentage}% →
+                        {currentPercentage ?? activeSession.startPercentage}% →{" "}
                         {activeSession.endPercentage}%
                     </p>
 
@@ -181,6 +228,57 @@ export default function ChargeForm({ vehicles }) {
                     <button onClick={stopCharging}>⛔ Stop charging</button>
                 </>
             )}
+
+            {/* ✅ CHARGING COMPLETE */}
+            {showComplete && activeSession && (
+                <>
+                    <p style={{ color: "#4caf50", fontWeight: "bold" }}>
+                        ✅ Charging complete
+                    </p>
+                    <p>{activeSession.endPercentage}% reached</p>
+                </>
+            )}
+
+
+            {history.length > 0 && (
+                <>
+                    <h3>Charging history</h3>
+                    <button
+                    onClick={async () => {
+                        await api.delete("/charging/history");
+                        setHistory([]);
+                    }}
+                >
+                    🧹 Clear history
+                </button>
+                    <ul>
+                        {history.map(session => (
+                            <li key={session.id} style={{ marginBottom: "12px" }}>
+                                <strong>
+                                    {session.vehicle.brand} {session.vehicle.model}
+                                </strong>
+                                <br />
+
+                                🔋 {session.startPercentage}% → {session.endPercentage}%
+                                <br />
+
+                                ⚡ {session.energyKWh.toFixed(2)} kWh
+                                <br />
+
+                                💰 {session.totalCost.toFixed(2)} kr
+                                <br />
+
+                                🕒 {new Date(session.startTime).toLocaleString()} –{" "}
+                                {new Date(session.endTime).toLocaleString()}
+                                <br />
+
+                                ⏱️ {session.durationMinutes} min
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+
         </div>
     );
 }

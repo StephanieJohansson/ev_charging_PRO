@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 
 @Service
@@ -152,6 +153,17 @@ public class UserChargingService {
 
         session.setEnergyKWh(energyDelivered);
 
+        double pricePerKWh = session.getStation().getPricePerKWh();
+
+        if (pricePerKWh <= 0) {
+            throw new IllegalStateException("Station price not set");
+        }
+
+        double totalCost = energyDelivered * pricePerKWh;
+
+        session.setTotalCost(totalCost);
+
+
         long durationMinutes =
                 Duration.between(session.getStartTime(), session.getEndTime()).toMinutes();
 
@@ -173,5 +185,14 @@ public class UserChargingService {
                 .orElse(null);
     }
 
+    public List<ChargingSession> getChargingHistory(){
+        User user = getCurrentUser();
+        return chargingSessionRepository
+                .findByUserIdAndEndTimeIsNotNullOrderByStartTimeDesc(user.getId());
+    }
 
+    public void clearHistory(){
+        User user = getCurrentUser();
+        chargingSessionRepository.deleteByUserId(user.getId());
+    }
 }

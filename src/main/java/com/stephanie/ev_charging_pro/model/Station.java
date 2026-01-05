@@ -21,4 +21,7 @@ public class Station {
 
     private int currentQueue; /*cars in queue*/
     private int estimatedWaitTime; /*in minutes*/
+
+    @Column(name = "price_per_kwh", nullable = false)
+    private double pricePerKWh; /*ex 3.50 SEK/KWh*/
 }

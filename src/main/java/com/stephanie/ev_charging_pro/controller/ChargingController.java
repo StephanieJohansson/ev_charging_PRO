@@ -17,6 +17,8 @@ import com.stephanie.ev_charging_pro.service.UserChargingService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/charging")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -105,6 +107,14 @@ public class ChargingController {
         return userChargingService.getActiveSession();
     }
 
+    @GetMapping("/history")
+    public List<ChargingSession> getChargingHistory(){
+        return userChargingService.getChargingHistory();
+    }
 
+    @DeleteMapping("/history")
+    public void clearHistory(){
+        userChargingService.clearHistory();
+    }
 }
 

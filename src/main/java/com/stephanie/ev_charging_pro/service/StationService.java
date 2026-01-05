@@ -92,10 +92,15 @@ public class StationService {
             throw new BadRequestException("avgChargeSeed must be greater than 11");
         }
 
+        if (stationDTO.getPricePerKWh() <= 0){
+            throw new BadRequestException("pricePerKWh must be greater than 0");
+        }
+
         Station station = Station.builder()
                 .location(stationDTO.getLocation())
                 .totalPlugs(stationDTO.getTotalPlugs())
                 .avgChargeSeed(stationDTO.getAvgChargeSeed())
+                .pricePerKWh(stationDTO.getPricePerKWh())
                 .currentQueue(0)
                 .estimatedWaitTime(0)
                 .build();
@@ -127,6 +132,7 @@ public class StationService {
         existingStation.setLocation(stationDTO.getLocation());
         existingStation.setTotalPlugs(stationDTO.getTotalPlugs());
         existingStation.setAvgChargeSeed(stationDTO.getAvgChargeSeed());
+        existingStation.setPricePerKWh(stationDTO.getPricePerKWh());
 
 
         return stationRepository.save(existingStation);
