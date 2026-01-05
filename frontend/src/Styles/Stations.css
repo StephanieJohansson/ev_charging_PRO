@@ -1,0 +1,81 @@
+.stations-page {
+    padding: 32px;
+}
+
+.station-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.station-card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+}
+
+.station-card-inner {
+    background: rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.station-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-4px);
+}
+
+.station-card h3 {
+    margin: 0 0 12px;
+    color: var(--accent);
+}
+
+.station-meta {
+    display: grid;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.station-action {
+    background: transparent;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    margin-top: 12px;
+    align-self: flex-end;
+    border: 1px solid rgba(255,255,255,0.6);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+}
+
+.station-action:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+
+/* COLORS */
+.station-card.free .status-dot {
+    background: #4ade80;
+}
+
+.station-card.medium .status-dot {
+    background: #facc15;
+}
+
+.station-card.busy .status-dot {
+    background: #f87171;
+}

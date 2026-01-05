@@ -1,0 +1,32 @@
+/* inspo from my last project */
+
+:root {
+    /* BACKGROUND */
+    --bg-main: rgb(60, 95, 82);
+    --bg-card: rgba(166, 168, 168, 0.3);
+    --bg-card-strong: rgba(166, 168, 168, 0.45);
+
+    /* TEXT */
+    --text-primary: #ffffff;
+    --text-secondary: #e4f0ec;
+
+    /* ACCENT (buttons, highlights) */
+    --accent: rgb(23, 71, 54);
+    --accent-hover: rgb(111, 158, 148);
+    --accent-electric: #6ee7ff; /* kall – tech */
+    --accent-energy:  #facc15; /* varm – kostnad */
+
+
+
+    /* UI */
+    --radius: 12px;
+    --radius-round: 6px;
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+    color: var(--text-primary);
+}
+p {
+    color: var(--text-secondary);
+}

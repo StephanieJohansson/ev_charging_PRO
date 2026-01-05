@@ -1,24 +1,65 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import "../Styles/Stations.css";
 
-// Stations component to display list of stations
 export default function Stations() {
     const [stations, setStations] = useState([]);
+    const navigate = useNavigate();
 
-    // Fetch stations from backend API on component mount
- useEffect(() => {
- api.get('/stations').then(res => setStations(res.data));
-}, []);
+    useEffect(() => {
+        api.get("/stations").then(res => setStations(res.data));
+    }, []);
 
-    // Render list of stations
+    const getStatus = (station) => {
+        if (station.currentQueue === 0) return "free";
+        if (station.estimatedWaitTime < 15) return "medium";
+        return "busy";
+    };
+
     return (
-        <div>
+        <div className="stations-page">
             <h2>Stations</h2>
-            {stations.map(s => (
-                <div key={s.id}>
-                    <b>{s.location}</b> – Queue: {s.currentQueue}, Wait: {s.estimatedWaitTime} min
-                </div>
-            ))}
+
+            <div className="station-grid">
+                {stations.map(s => (
+                    <div
+                        key={s.id}
+                        className={`station-card ${getStatus(s)}`}
+                    >
+                        <div className="station-card-inner">
+                            {/* HEADER */}
+                            <div className="station-header">
+                                <h3>{s.location}</h3>
+                                <span className="status-dot" />
+                            </div>
+
+                            {/* META */}
+                            <div className="station-meta">
+                                <div>🔌 {s.totalPlugs} plugs</div>
+                                <div>⚡ {s.avgChargeSeed} kW</div>
+                                <div>👥 Queue: {s.currentQueue}</div>
+                                <div>⏱️ Wait: {s.estimatedWaitTime} min</div>
+                                <div>💰 {s.pricePerKWh} kr/kWh</div>
+                            </div>
+
+                            {/* ACTION */}
+                            <button
+                                className="station-action"
+                                onClick={() =>
+                                    navigate("/dashboard", {
+                                        state: { stationId: s.id }
+                                    })
+                                }
+                                title="Charge here"
+                            >
+                                🔌 Charge here
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
+

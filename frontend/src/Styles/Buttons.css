@@ -1,0 +1,28 @@
+.btn {
+    background-color: var(--accent);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.6);
+
+    padding: 6px 14px;
+    border-radius: 6px;
+
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}

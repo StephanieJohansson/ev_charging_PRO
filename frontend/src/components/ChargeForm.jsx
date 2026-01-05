@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 
-const TICK_MS = 1000;      // 1 second
-const TIME_SCALE = 1;     // 1 second = 1 minute
+const TICK_MS = 1000;
+const TIME_SCALE = 1;
 
-export default function ChargeForm({ vehicles }) {
+export default function ChargeForm({ vehicles, onSessionFinished }) {
     const [stations, setStations] = useState([]);
     const [vehicleId, setVehicleId] = useState("");
     const [stationId, setStationId] = useState("");
@@ -27,9 +27,6 @@ export default function ChargeForm({ vehicles }) {
         activeSession &&
         currentPercentage >= activeSession.endPercentage;
 
-
-    const [history, setHistory] = useState( [])
-
     /* ---------------- LOAD DATA ---------------- */
 
     useEffect(() => {
@@ -39,15 +36,6 @@ export default function ChargeForm({ vehicles }) {
             .then(res => setActiveSession(res.data))
             .catch(() => {});
     }, []);
-
-    /* ---------------- LOAD CHARGING HISTORY ---------------- */
-
-    useEffect(() => {
-        api.get("/charging/history")
-            .then(res => setHistory(res.data))
-            .catch(() => {});
-    }, []);
-
 
     /* ---- If active session but no estimate (refresh) ---- */
     useEffect(() => {
@@ -85,11 +73,8 @@ export default function ChargeForm({ vehicles }) {
                 Math.max(0, Math.round(estimatedMinutes - elapsed))
             );
 
-            // ⭐ AUTO STOP
             if (ratio >= 1) {
                 clearInterval(interval);
-
-                // Visa "Charging complete"
                 setShowComplete(true);
 
                 await api.post("/charging/stop", {
@@ -97,17 +82,14 @@ export default function ChargeForm({ vehicles }) {
                     endPercentage: endPct
                 });
 
-                // refresh history
-                const historyRes = await api.get("/charging/history");
-                setHistory(historyRes.data);
-
-                // let user see the message for a bit before clearing it
                 setTimeout(() => {
                     setShowComplete(false);
                     setActiveSession(null);
                     setEstimatedMinutes(null);
                     setCurrentPercentage(null);
                     setRemainingMinutes(null);
+
+                    onSessionFinished?.(); // 🔁 dashboard reload
                 }, 2000);
             }
         }, TICK_MS);
@@ -115,22 +97,25 @@ export default function ChargeForm({ vehicles }) {
         return () => clearInterval(interval);
     }, [activeSession, estimatedMinutes]);
 
-
     /* ---------------- ACTIONS ---------------- */
 
     const estimate = async (e) => {
         e.preventDefault();
         setError(null);
 
-        const res = await api.post("/charging/estimate", {
-            vehicleId,
-            stationId,
-            startPercentage: start,
-            endPercentage: end
-        });
+        try {
+            const res = await api.post("/charging/estimate", {
+                vehicleId,
+                stationId,
+                startPercentage: start,
+                endPercentage: end
+            });
 
-        setPreview(res.data);
-        setEstimatedMinutes(res.data.totalTimeMinutes);
+            setPreview(res.data);
+            setEstimatedMinutes(res.data.totalTimeMinutes);
+        } catch {
+            setError("Could not estimate charging");
+        }
     };
 
     const startCharging = async () => {
@@ -156,44 +141,49 @@ export default function ChargeForm({ vehicles }) {
             sessionId: activeSession.id,
             endPercentage: currentPercentage ?? end
         });
-        api.get("/charging/history")
-            .then(res => setHistory(res.data));
-
 
         setActiveSession(null);
         setEstimatedMinutes(null);
         setCurrentPercentage(null);
         setRemainingMinutes(null);
         setLoading(false);
+
+        onSessionFinished?.();
     };
 
     /* ---------------- UI ---------------- */
 
     return (
-        <div>
+        <div className="card">
             <h3>Charge my vehicle</h3>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <p className="error">{error}</p>}
 
             {!activeSession && (
-                <form onSubmit={estimate}>
+                <form onSubmit={estimate} className="form">
                     <select required value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
                         <option value="">Select vehicle</option>
                         {vehicles.map(v => (
-                            <option key={v.id} value={v.id}>{v.brand} {v.model}</option>
+                            <option key={v.id} value={v.id}>
+                                {v.brand} {v.model}
+                            </option>
                         ))}
                     </select>
 
                     <select required value={stationId} onChange={e => setStationId(e.target.value)}>
                         <option value="">Select station</option>
                         {stations.map(s => (
-                            <option key={s.id} value={s.id}>{s.location}</option>
+                            <option key={s.id} value={s.id}>
+                                {s.location}
+                            </option>
                         ))}
                     </select>
 
-                    <input type="number" value={start} onChange={e => setStart(+e.target.value)} />
-                    <input type="number" value={end} onChange={e => setEnd(+e.target.value)} />
+                    <div className="row">
+                        <input type="number" value={start} onChange={e => setStart(+e.target.value)} />
+                        <input type="number" value={end} onChange={e => setEnd(+e.target.value)} />
+                    </div>
 
-                    <button>Estimate charging</button>
+                    <button className="btn">Estimate charging</button>
                 </form>
             )}
 
@@ -202,85 +192,34 @@ export default function ChargeForm({ vehicles }) {
                     <p>Queue: {preview.queueTimeMinutes} min</p>
                     <p>Charging: {preview.chargingTimeMinutes} min</p>
                     <strong>Total: {preview.totalTimeMinutes} min</strong>
-                    <p>⚡ Estimated energy: {preview.estimatedEnergyKWh.toFixed(2)} kWh</p>
-                    <p>💰 Estimated cost: {preview.estimatedCost.toFixed(2)} kr</p>
-                    <br />
-                    <button onClick={startCharging}>🔌 Start charging</button>
+                    <p>⚡ {preview.estimatedEnergyKWh.toFixed(2)} kWh</p>
+                    <p>💰 {preview.estimatedCost.toFixed(2)} kr</p>
+
+                    <button className="btn" onClick={startCharging}>
+                        🔌 Start charging
+                    </button>
                 </>
             )}
 
-            {/* 🔋 ACTIVE CHARGING */}
             {activeSession && !showComplete && (
                 <>
-                    <p>🔋 Charging in progress</p>
-
                     <progress
                         value={currentPercentage ?? activeSession.startPercentage}
                         max={activeSession.endPercentage}
-                        style={{ width: "100%" }}
                     />
 
-                    <p>
-                        {currentPercentage ?? activeSession.startPercentage}% →{" "}
-                        {activeSession.endPercentage}%
-                    </p>
+                    <p>{currentPercentage ?? activeSession.startPercentage}% → {activeSession.endPercentage}%</p>
+                    <p>⏱ {remainingMinutes} min left</p>
 
-                    <p>⏱️ Time remaining: {remainingMinutes} min</p>
-
-                    <button onClick={stopCharging}>⛔ Stop charging</button>
+                    <button className="btn danger" onClick={stopCharging}>
+                        Stop charging
+                    </button>
                 </>
             )}
 
-            {/* ✅ CHARGING COMPLETE */}
-            {showComplete && activeSession && (
-                <>
-                    <p style={{ color: "#4caf50", fontWeight: "bold" }}>
-                        ✅ Charging complete
-                    </p>
-                    <p>{activeSession.endPercentage}% reached</p>
-                </>
+            {showComplete && (
+                <p className="success">✅ Charging complete</p>
             )}
-
-
-            {history.length > 0 && (
-                <>
-                    <h3>Charging history</h3>
-                    <button
-                    onClick={async () => {
-                        await api.delete("/charging/history");
-                        setHistory([]);
-                    }}
-                >
-                    🧹 Clear history
-                </button>
-                    <ul>
-                        {history.map(session => (
-                            <li key={session.id} style={{ marginBottom: "12px" }}>
-                                <strong>
-                                    {session.vehicle.brand} {session.vehicle.model}
-                                </strong>
-                                <br />
-
-                                🔋 {session.startPercentage}% → {session.endPercentage}%
-                                <br />
-
-                                ⚡ {session.energyKWh.toFixed(2)} kWh
-                                <br />
-
-                                💰 {session.totalCost.toFixed(2)} kr
-                                <br />
-
-                                🕒 {new Date(session.startTime).toLocaleString()} –{" "}
-                                {new Date(session.endTime).toLocaleString()}
-                                <br />
-
-                                Duration: {session.durationMinutes} min
-                            </li>
-                        ))}
-                    </ul>
-                </>
-            )}
-
         </div>
     );
 }

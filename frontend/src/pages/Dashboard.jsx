@@ -4,159 +4,161 @@ import ChargeForm from "../components/ChargeForm";
 
 export default function Dashboard() {
     const [vehicles, setVehicles] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [history, setHistory] = useState([]);
 
-    // form state
     const [brand, setBrand] = useState("");
     const [model, setModel] = useState("");
     const [plateNumber, setPlateNumber] = useState("");
-    const [submitting, setSubmitting] = useState(false);
 
-    // fetch vehicles
+    /* ---------------- LOAD DATA ---------------- */
+
     const loadVehicles = () => {
-        setLoading(true);
-        api
-            .get("/vehicles")
-            .then(res => {
-                setVehicles(res.data);
-                setError(null);
-            })
-            .catch(err => {
-                console.error(err);
-                setError("Could not load vehicles");
-            })
-            .finally(() => setLoading(false));
+        api.get("/vehicles").then(res => setVehicles(res.data));
+    };
+
+    const loadHistory = () => {
+        api.get("/charging/history")
+            .then(res => setHistory(res.data))
+            .catch(() => {});
     };
 
     useEffect(() => {
         loadVehicles();
+        loadHistory();
     }, []);
 
-    // add vehicle
+    /* ---------------- VEHICLE ACTIONS ---------------- */
+
     const handleAddVehicle = e => {
         e.preventDefault();
 
-        if (!brand || !model || !plateNumber) {
-            alert("All fields are required");
-            return;
-        }
-
-        setSubmitting(true);
-
-        api
-            .post("/vehicles", {
-                brand,
-                model,
-                plateNumber
-            })
-            .then(() => {
-                setBrand("");
-                setModel("");
-                setPlateNumber("");
-                loadVehicles();
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Could not add vehicle");
-            })
-            .finally(() => setSubmitting(false));
+        api.post("/vehicles", { brand, model, plateNumber }).then(() => {
+            setBrand("");
+            setModel("");
+            setPlateNumber("");
+            loadVehicles();
+        });
     };
 
-    // delete vehicle
     const handleDeleteVehicle = id => {
-        if (!window.confirm("Delete this vehicle?")) return;
-
-        api
-            .delete(`/vehicles/${id}`)
-            .then(() => {
-                setVehicles(prev => prev.filter(v => v.id !== id));
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Could not delete vehicle");
-            });
+        if (!window.confirm("Delete vehicle?")) return;
+        api.delete(`/vehicles/${id}`).then(loadVehicles);
     };
 
-    if (loading) return <p>Loading vehicles...</p>;
-    if (error) return <p>{error}</p>;
+    /* ---------------- UI ---------------- */
 
     return (
-        <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-            <h2>My Vehicles</h2>
+        <div className="dashboard-grid">
 
-            {vehicles.length === 0 ? (
-                <p>No vehicles added yet.</p>
-            ) : (
-                <ul style={{ listStyle: "none", padding: 0 }}>
-                    {vehicles.map(v => (
-                        <li
-                            key={v.id}
-                            style={{
-                                border: "1px solid #444",
-                                padding: "12px",
-                                marginBottom: "10px",
-                                borderRadius: "6px"
-                            }}
-                        >
-                            <strong>
-                                {v.brand} {v.model}
-                            </strong>
-                            <br />
-                            Plate: {v.plateNumber}
-                            <br />
-                            Battery: {v.batteryCapacity} kWh
-                            <br />
+            {/* LEFT COLUMN */}
+            <div className="dashboard-left">
+
+                {/* VEHICLES */}
+                <section className="card">
+                    <h2>My Vehicles</h2>
+
+                    {vehicles.length === 0 ? (
+                        <p className="muted">No vehicles added yet.</p>
+                    ) : (
+                        <ul className="vehicle-list">
+                            {vehicles.map(v => (
+                                <li key={v.id} className="vehicle-item">
+                                    <strong>{v.brand} {v.model}</strong>
+                                    <p className="muted">Plate: {v.plateNumber}</p>
+                                    <p className="muted">Battery: {v.batteryCapacity} kWh</p>
+
+                                    <button
+                                        className="btn danger-btn"
+                                        onClick={() => handleDeleteVehicle(v.id)}
+                                    >
+                                        Remove
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                {/* ADD VEHICLE */}
+                <section className="card">
+                    <h2>Add vehicle</h2>
+
+                    <form className="form" onSubmit={handleAddVehicle}>
+                        <input
+                            placeholder="Brand"
+                            value={brand}
+                            onChange={e => setBrand(e.target.value)}
+                        />
+                        <input
+                            placeholder="Model"
+                            value={model}
+                            onChange={e => setModel(e.target.value)}
+                        />
+                        <input
+                            placeholder="Plate number"
+                            value={plateNumber}
+                            onChange={e => setPlateNumber(e.target.value)}
+                        />
+
+                        <button className="btn">Add vehicle</button>
+                    </form>
+                </section>
+
+                {/* CHARGING */}
+                <section className="card">
+                    <ChargeForm
+                        vehicles={vehicles}
+                        onSessionFinished={loadHistory}
+                    />
+                </section>
+
+            </div>
+
+            {/* RIGHT COLUMN */}
+            <aside className="dashboard-right">
+                <section className="card history-card">
+                    <h2>Charging history</h2>
+
+                    {history.length === 0 ? (
+                        <p className="muted">No completed sessions yet.</p>
+                    ) : (
+                        <>
                             <button
-                                onClick={() => handleDeleteVehicle(v.id)}
-                                style={{ marginTop: "8px" }}
+                                className="btn"
+                                onClick={async () => {
+                                    await api.delete("/charging/history");
+                                    setHistory([]);
+                                }}
                             >
-                                🗑 Remove
+                                🧹 Clear history
                             </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
 
-            <hr style={{ margin: "30px 0" }} />
+                            <ul className="history-list">
+                                {history.map(h => (
+                                    <li key={h.id} className="history-item">
+                                        <strong>
+                                            {h.vehicle.brand} {h.vehicle.model}
+                                        </strong>
 
-            <h3>Add vehicle</h3>
+                                        <p>🔋 {h.startPercentage}% → {h.endPercentage}%</p>
+                                        <p>⚡ {h.energyKWh.toFixed(2)} kWh</p>
+                                        <p>💰 {h.totalCost.toFixed(2)} kr</p>
 
-            <form onSubmit={handleAddVehicle}>
-                <div>
-                    <input
-                        placeholder="Brand"
-                        value={brand}
-                        onChange={e => setBrand(e.target.value)}
-                    />
-                </div>
+                                        <p className="muted">
+                                            🕒 {new Date(h.startTime).toLocaleString()} –{" "}
+                                            {new Date(h.endTime).toLocaleString()}
+                                        </p>
 
-                <div>
-                    <input
-                        placeholder="Model"
-                        value={model}
-                        onChange={e => setModel(e.target.value)}
-                    />
-                </div>
-
-                <div>
-                    <input
-                        placeholder="Plate number"
-                        value={plateNumber}
-                        onChange={e => setPlateNumber(e.target.value)}
-                    />
-                </div>
-
-                <button type="submit" disabled={submitting}>
-                    {submitting ? "Adding..." : "Add vehicle"}
-                </button>
-            </form>
-
-            <hr style={{ margin: "30px 0" }} />
-
-            <h3>Charge vehicle</h3>
-
-            <ChargeForm vehicles={vehicles} />
+                                        <p className="muted">
+                                            Duration: {h.durationMinutes} min
+                                        </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    )}
+                </section>
+            </aside>
 
         </div>
     );

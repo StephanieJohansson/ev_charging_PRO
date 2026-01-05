@@ -1,40 +1,35 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import "../Styles/Navbar.css";
 
 export default function Navbar() {
     const { user, logout } = useAuth();
 
-    if (!user) return null;
-
     return (
-        <nav style={styles.nav}>
-            <div style={styles.left}>
-                <Link to="/dashboard">Dashboard</Link>
-                <Link to="/stations">Stations</Link>
+        <nav className="navbar">
+            <div className="nav-left">
+                <NavLink to="/stations" className="nav-item">Stations</NavLink>
 
-                {user.role === "ADMIN" && (
+                {user && <NavLink to="/dashboard" className="nav-item">Dashboard</NavLink>}
+
+                {user?.role === "ADMIN" && (
                     <>
-                        <Link to="/admin/stations">Admin: Stations</Link>
-                        <Link to="/admin/create">Admin: Create station</Link>
+                        <NavLink to="/admin/stations" className="nav-item">Admin stations</NavLink>
+                        <NavLink to="/admin/create" className="nav-item">Create station</NavLink>
                     </>
                 )}
             </div>
 
-            <button onClick={logout}>Logout</button>
+            <div className="nav-right">
+                {!user ? (
+                    <>
+                        <NavLink to="/login">Login</NavLink>
+                        <NavLink to="/register">Register</NavLink>
+                    </>
+                ) : (
+                    <button onClick={logout}>Logout</button>
+                )}
+            </div>
         </nav>
     );
 }
-
-const styles = {
-    nav: {
-        display: "flex",
-        justifyContent: "space-between",
-        padding: "12px 20px",
-        borderBottom: "1px solid #444",
-        marginBottom: "20px"
-    },
-    left: {
-        display: "flex",
-        gap: "15px"
-    }
-};
