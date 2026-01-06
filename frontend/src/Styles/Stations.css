@@ -26,8 +26,20 @@
 }
 
 .station-card h3 {
-    margin: 0 0 12px;
     color: var(--accent);
+    font-weight: 600;
+}
+
+.station-card.free h3 {
+    color: #6ee7b7;
+}
+
+.station-card.medium h3 {
+    color: #facc15;
+}
+
+.station-card.busy h3 {
+    color: #f87171;
 }
 
 .station-meta {

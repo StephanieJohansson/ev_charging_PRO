@@ -5,9 +5,7 @@
 }
 
 body {
-    font-family: Cambria, Georgia, "Times New Roman", serif;
-    font-style: oblique;
-    background-color: var(--bg-main);
+    background: var(--bg-main);
     color: var(--text-primary);
 }
 

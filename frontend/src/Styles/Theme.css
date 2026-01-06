@@ -1,32 +1,52 @@
 /* inspo from my last project */
 
+
 :root {
-    /* BACKGROUND */
-    --bg-main: rgb(60, 95, 82);
-    --bg-card: rgba(166, 168, 168, 0.3);
-    --bg-card-strong: rgba(166, 168, 168, 0.45);
+    /* ===== BACKGROUNDS ===== */
+    --bg-main: #0f2a22;
+    --bg-surface: #173a30;
+    --bg-card: #1f4a3e;
+    --bg-card-hover: #25594b;
 
-    /* TEXT */
-    --text-primary: #ffffff;
-    --text-secondary: #e4f0ec;
+    --bg-card: rgba(255, 255, 255, 0.08);
+    --bg-card-hover: rgba(255, 255, 255, 0.12);
+    --bg-card-strong: rgba(255, 255, 255, 0.16);
 
-    /* ACCENT (buttons, highlights) */
-    --accent: rgb(23, 71, 54);
-    --accent-hover: rgb(111, 158, 148);
-    --accent-electric: #6ee7ff; /* kall – tech */
-    --accent-energy:  #facc15; /* varm – kostnad */
+    --bg-input: rgba(255, 255, 255, 0.9);
 
+    /* ===== TEXT ===== */
+    --text-primary: #e6f4ef;
+    --text-secondary: #b6d6cb;
+    --text-muted: #8fb8a9;
 
+    /* ===== ACCENT ===== */
+    --accent: #0e2b21;
+    --accent-soft: #81efc1;
+    --accent-dark: #1e6f58;
 
-    /* UI */
+    /* ===== STATUS COLORS ===== */
+    --status-free: #4ade80;
+    --status-medium: #facc15;
+    --status-busy: #fb7185;
+
+    /* BUTTONS */
+    --btn-primary-bg: #1e6f58;
+    --btn-primary-hover: #061c15;
+    --btn-danger: #b45353;
+
+    /* BORDERS / SHADOWS */
+    --border-soft: rgba(255,255,255,0.08);
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.35);
+
+    /* ===== UI ===== */
+    --radius-sm: 6px;
     --radius: 12px;
-    --radius-round: 6px;
-    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.15);
+    --radius-lg: 18px;
+    --shadow-hover: 0 14px 35px rgba(0, 0, 0, 0.35);
+
 }
 
-h2 {
-    color: var(--text-primary);
+h2, h3 {
+    color: var(--accent-soft);
 }
-p {
-    color: var(--text-secondary);
-}
+

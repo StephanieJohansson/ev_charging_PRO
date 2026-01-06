@@ -4,10 +4,10 @@ import api from "../api/api";
 const TICK_MS = 1000;
 const TIME_SCALE = 1;
 
-export default function ChargeForm({ vehicles, onSessionFinished }) {
+export default function ChargeForm({ vehicles, onSessionFinished, preselectedStationId }) {
     const [stations, setStations] = useState([]);
     const [vehicleId, setVehicleId] = useState("");
-    const [stationId, setStationId] = useState("");
+    const [stationId, setStationId] = useState(preselectedStationId ??"");
     const [start, setStart] = useState(20);
     const [end, setEnd] = useState(80);
 
@@ -28,6 +28,12 @@ export default function ChargeForm({ vehicles, onSessionFinished }) {
         currentPercentage >= activeSession.endPercentage;
 
     /* ---------------- LOAD DATA ---------------- */
+
+    useEffect(() => {
+        if (preselectedStationId) {
+            setStationId(preselectedStationId);
+        }
+    }, [preselectedStationId]);
 
     useEffect(() => {
         api.get("/stations").then(res => setStations(res.data));

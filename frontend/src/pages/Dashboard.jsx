@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
 import ChargeForm from "../components/ChargeForm";
+import { useLocation } from "react-router-dom";
 
 export default function Dashboard() {
     const [vehicles, setVehicles] = useState([]);
@@ -9,6 +10,9 @@ export default function Dashboard() {
     const [brand, setBrand] = useState("");
     const [model, setModel] = useState("");
     const [plateNumber, setPlateNumber] = useState("");
+
+    const location = useLocation();
+    const preselectedStationId = location.state?.stationId;
 
     /* ---------------- LOAD DATA ---------------- */
 
@@ -106,10 +110,19 @@ export default function Dashboard() {
 
                 {/* CHARGING */}
                 <section className="card">
+                    <h2>Charge my vehicle</h2>
+
+                    {preselectedStationId && (
+                        <p className="muted">
+                            📍 Station selected from stations list
+                        </p>
+                    )}
                     <ChargeForm
                         vehicles={vehicles}
+                        preselectedStationId={preselectedStationId}
                         onSessionFinished={loadHistory}
                     />
+
                 </section>
 
             </div>
