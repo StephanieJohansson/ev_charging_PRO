@@ -28,4 +28,9 @@ public class VehicleController {
     public List<Vehicle> getAllVehicles(){
         return vehicleService.getMyVehicles();
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteVehicle(@PathVariable Long id){
+        vehicleService.deleteVehicle(id);
+    }
 }

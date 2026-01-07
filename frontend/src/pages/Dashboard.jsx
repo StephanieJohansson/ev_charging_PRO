@@ -44,10 +44,21 @@ export default function Dashboard() {
         });
     };
 
-    const handleDeleteVehicle = id => {
+    const handleDeleteVehicle = async (id) => {
         if (!window.confirm("Delete vehicle?")) return;
-        api.delete(`/vehicles/${id}`).then(loadVehicles);
+
+        try {
+            await api.delete(`/vehicles/${id}`);
+            loadVehicles();
+        } catch (err) {
+            alert(
+                "This vehicle cannot be deleted because it has charging history. " +
+                "Please clear the history first."
+            );
+        }
+
     };
+
 
     /* ---------------- UI ---------------- */
 

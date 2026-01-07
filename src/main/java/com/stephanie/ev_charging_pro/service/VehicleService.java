@@ -6,8 +6,13 @@ import com.stephanie.ev_charging_pro.model.User;
 import com.stephanie.ev_charging_pro.model.Vehicle;
 import com.stephanie.ev_charging_pro.repository.UserRepository;
 import com.stephanie.ev_charging_pro.repository.VehicleRepository;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -62,5 +67,17 @@ public class VehicleService {
     public List<Vehicle> getMyVehicles(){
 
         return vehicleRepository.findByOwner(getCurrentUser());
+    }
+
+    @Transactional
+    public void deleteVehicle(Long id){
+      try {
+           vehicleRepository.deleteById(id);
+           vehicleRepository.flush();
+       } catch (DataIntegrityViolationException e) {
+           throw new ResponseStatusException(
+                   HttpStatus.CONFLICT,
+                   "Vehicle cannot be deleted because it has charging history");
+       }
     }
 }

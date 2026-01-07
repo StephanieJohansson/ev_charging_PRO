@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "vehicles")
 @Data
@@ -27,4 +29,8 @@ public class Vehicle {
     @JoinColumn(name = "user_id")
     @JsonIgnoreProperties("vehicles") // to stop loop
     private User owner;
+
+    @OneToMany(mappedBy = "vehicle")
+    @JsonIgnore
+    private List<ChargingSession> chargingSessions;
 }
