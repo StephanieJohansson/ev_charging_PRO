@@ -7,7 +7,7 @@ import com.stephanie.ev_charging_pro.service.SimulationService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/sim")
+@RequestMapping("admin/sim")
 public class SimulationController {
 
     private final SimulationService simulationService;

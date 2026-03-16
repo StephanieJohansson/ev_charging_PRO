@@ -27,6 +27,11 @@ public class StationController {
         return stationService.getAllStations();
     }
 
+    // endpoint to be able to promote simulation stations to released stations as ADMIN
+    @PostMapping
+    public Station createStation(@RequestBody StationDTO stationDTO){
+        return stationService.createStation(stationDTO);
+    }
 
 
 }

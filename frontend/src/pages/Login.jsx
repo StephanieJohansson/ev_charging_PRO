@@ -17,9 +17,15 @@ export default function Login() {
         // Send login request to backend API
         try {
             const response = await api.post('/auth/login', { email, password });
+            console.log("LOGIN RESPONSE: ", response.data);
             const { token, role } = response.data;
             login(token, role);
-            navigate('/stations');
+
+            if (role === 'ADMIN') {
+                navigate("/admin");
+            } else {
+                navigate("/stations");
+            }
         } catch (error) {
             console.error('Login failed:', error);
             alert('Login failed. Please check your credentials and try again.');

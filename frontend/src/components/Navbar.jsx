@@ -14,8 +14,9 @@ export default function Navbar() {
 
                 {user?.role === "ADMIN" && (
                     <>
-                        <NavLink to="/admin/stations" className="nav-item">Admin stations</NavLink>
-                        <NavLink to="/admin/create" className="nav-item">Create station</NavLink>
+                        <NavLink to="/admin/users" className="nav-item">All users</NavLink>
+                        <NavLink to="/admin/sim" className="nav-item">Simulation</NavLink>
+                        <NavLink to="/admin" className="nav-item">Admin dashboard</NavLink>
                     </>
                 )}
             </div>

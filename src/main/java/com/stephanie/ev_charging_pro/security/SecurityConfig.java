@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // allow anonymous resource requests aka you dont need to login to access them
                         .requestMatchers("/auth/register", "/auth/login" , "/stations/**").permitAll()
-                        .requestMatchers("/admin/**", "/sim").hasRole("ADMIN")
+                        .requestMatchers("/admin/**", "/admin/sim").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
