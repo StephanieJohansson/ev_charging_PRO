@@ -104,7 +104,7 @@ export default function AdminSimulation() {
                     />
 
                     <input
-                        placeholder="Price per kWh"
+                        placeholder="Price per KWh"
                         value={pricePerKWh}
                         onChange={(e) => setPricePerKWh(e.target.value)}
                     />
