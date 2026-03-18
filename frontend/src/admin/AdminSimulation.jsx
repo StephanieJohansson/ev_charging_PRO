@@ -78,6 +78,14 @@ export default function AdminSimulation() {
     };
 
     return (
+        <div className="admin-page">
+            <button
+                className="btn admin-back"
+                onClick={() => navigate("/admin")}
+            >
+                ← Back to admin control panel
+            </button>
+
         <div className="dashboard-grid">
             <div className="dashboard-left">
 
@@ -137,7 +145,7 @@ export default function AdminSimulation() {
                     />
 
                     <button
-                        className="btn-primary"
+                        className="btn"
                         onClick={runSimulation}
                     >
                         Run simulation
@@ -172,11 +180,14 @@ export default function AdminSimulation() {
 
                             <div style={{marginTop:"12px"}}>
 
-                                <button onClick={deleteSimulation}>
+                                <button
+                                    className="btn"
+                                    onClick={deleteSimulation}>
                                     Delete simulation
                                 </button>
 
                                 <button
+                                    className="btn"
                                     onClick={promoteStation}
                                     style={{marginLeft:"10px"}}
                                 >
@@ -191,6 +202,7 @@ export default function AdminSimulation() {
                 </section>
 
             </div>
+        </div>
         </div>
     );
 }

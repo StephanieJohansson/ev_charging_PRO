@@ -21,7 +21,7 @@ export default function Login() {
             const { token, role } = response.data;
             login(token, role);
 
-            if (role === 'ADMIN') {
+            if (role.includes('ADMIN')) {
                 navigate("/admin");
             } else {
                 navigate("/stations");

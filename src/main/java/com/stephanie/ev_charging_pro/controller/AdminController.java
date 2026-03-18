@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.stephanie.ev_charging_pro.model.User;
+import com.stephanie.ev_charging_pro.repository.UserRepository;
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin
@@ -14,9 +18,18 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final StationService stationService;
+    private final UserRepository userRepository;
 
-    public AdminController(StationService stationService) {
+    public AdminController(StationService stationService, UserRepository userRepository) {
+
         this.stationService = stationService;
+        this.userRepository = userRepository;
+    }
+
+    // let admin see all users
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
     // let admin create new stations

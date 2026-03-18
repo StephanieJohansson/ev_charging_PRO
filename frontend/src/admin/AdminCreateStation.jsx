@@ -1,36 +1,49 @@
 import { useState } from "react";
 import api from "../api/api.js";
+import "../Styles/Admin.css";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminCreateStation() {
+
+    const navigate = useNavigate();
+
     const [location, setLocation] = useState("");
-    const [avgChargeSpeed, setAvgChargeSpeed] = useState("");
+    const [avgChargeSeed, setAvgChargeSeed] = useState("");
     const [totalPlugs, setTotalPlugs] = useState("");
     const [currentQueue, setCurrentQueue] = useState("");
+    const [estimatedWaitTime, setEstimatedWaitTime] = useState("");
+    const [pricePerKWh, setPricePerKWh] = useState("");
+
     const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = e => {
         e.preventDefault();
 
-        if (!location || !avgChargeSpeed || !totalPlugs) {
+        if (!location || !avgChargeSeed || !totalPlugs) {
             alert("Location, power and plugs are required");
             return;
         }
 
         setSubmitting(true);
 
-        api
-            .post("/admin/stations", {
-                location,
-                avgChargeSpeed: Number(avgChargeSpeed),
-                totalPlugs: Number(totalPlugs),
-                currentQueue: Number(currentQueue) || 0
-            })
+        api.post("/admin/stations", {
+            location,
+            avgChargeSeed: Number(avgChargeSeed),
+            totalPlugs: Number(totalPlugs),
+            currentQueue: Number(currentQueue) || 0,
+            estimatedWaitTime: Number(estimatedWaitTime) || 0,
+            pricePerKWh: Number(pricePerKWh) || 0
+        })
             .then(() => {
-                alert("Station created");
+                alert("Station created successfully");
+                navigate("/admin/stations");
+
                 setLocation("");
-                setAvgChargeSpeed("");
+                setAvgChargeSeed("");
                 setTotalPlugs("");
                 setCurrentQueue("");
+                setEstimatedWaitTime("");
+                setPricePerKWh("");
             })
             .catch(err => {
                 console.error(err);
@@ -40,49 +53,76 @@ export default function AdminCreateStation() {
     };
 
     return (
-        <div style={{ maxWidth: "500px", margin: "0 auto" }}>
-            <h2>Admin – Create Station</h2>
+        <div className="admin-page">
 
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <input
-                        placeholder="Location"
-                        value={location}
-                        onChange={e => setLocation(e.target.value)}
-                    />
-                </div>
+            <button
+                className="btn admin-back"
+                onClick={() => navigate("/admin")}
+            >
+                ← Back to admin control panel
+            </button>
 
-                <div>
-                    <input
-                        type="number"
-                        placeholder="Avg charge speed (kW)"
-                        value={avgChargeSpeed}
-                        onChange={e => setAvgChargeSpeed(e.target.value)}
-                    />
-                </div>
+            <div className="admin-form-container">
 
-                <div>
-                    <input
-                        type="number"
-                        placeholder="Total plugs"
-                        value={totalPlugs}
-                        onChange={e => setTotalPlugs(e.target.value)}
-                    />
-                </div>
+                <section className="card">
+                    <h2>Admin – Create Station</h2>
 
-                <div>
-                    <input
-                        type="number"
-                        placeholder="Current queue (optional)"
-                        value={currentQueue}
-                        onChange={e => setCurrentQueue(e.target.value)}
-                    />
-                </div>
+                    <form className="form" onSubmit={handleSubmit}>
 
-                <button type="submit" disabled={submitting}>
-                    {submitting ? "Creating..." : "Create station"}
-                </button>
-            </form>
+                        <input
+                            placeholder="Location"
+                            value={location}
+                            onChange={e => setLocation(e.target.value)}
+                        />
+
+                        <input
+                            type="number"
+                            placeholder="Avg charge speed (kW)"
+                            value={avgChargeSeed}
+                            onChange={e => setAvgChargeSeed(e.target.value)}
+                        />
+
+                        <input
+                            type="number"
+                            placeholder="Total plugs"
+                            value={totalPlugs}
+                            onChange={e => setTotalPlugs(e.target.value)}
+                        />
+
+                        <input
+                            type="number"
+                            placeholder="Current queue"
+                            value={currentQueue}
+                            onChange={e => setCurrentQueue(e.target.value)}
+                        />
+
+                        <input
+                            type="number"
+                            placeholder="Estimated wait time (min)"
+                            value={estimatedWaitTime}
+                            onChange={e => setEstimatedWaitTime(e.target.value)}
+                        />
+
+                        <input
+                            type="number"
+                            placeholder="Price per kWh"
+                            value={pricePerKWh}
+                            onChange={e => setPricePerKWh(e.target.value)}
+                        />
+
+                        <button
+                            className="btn"
+                            type="submit"
+                            disabled={submitting}
+                        >
+                            {submitting ? "Creating..." : "Create station"}
+                        </button>
+
+                    </form>
+
+                </section>
+
+            </div>
         </div>
     );
 }

@@ -7,20 +7,25 @@ export default function Navbar() {
 
     return (
         <nav className="navbar">
-            <div className="nav-left">
-                <NavLink to="/stations" className="nav-item">Stations</NavLink>
 
-                {user && <NavLink to="/dashboard" className="nav-item">Dashboard</NavLink>}
+            {/* NAV LEFT – visas bara för icke-admin */}
+            {user?.role !== "ADMIN" && (
+                <div className="nav-left">
 
-                {user?.role === "ADMIN" && (
-                    <>
-                        <NavLink to="/admin/users" className="nav-item">All users</NavLink>
-                        <NavLink to="/admin/sim" className="nav-item">Simulation</NavLink>
-                        <NavLink to="/admin" className="nav-item">Admin dashboard</NavLink>
-                    </>
-                )}
-            </div>
+                    <NavLink to="/stations" className="nav-item">
+                        Stations
+                    </NavLink>
 
+                    {user && (
+                        <NavLink to="/dashboard" className="nav-item">
+                            Dashboard
+                        </NavLink>
+                    )}
+
+                </div>
+            )}
+
+            {/* NAV RIGHT */}
             <div className="nav-right">
                 {!user ? (
                     <>
@@ -31,6 +36,7 @@ export default function Navbar() {
                     <button onClick={logout}>Logout</button>
                 )}
             </div>
+
         </nav>
     );
 }

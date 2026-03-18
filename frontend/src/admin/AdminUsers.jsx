@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import "../Styles/Admin.css";
 
 export default function AdminUsers() {
+
+    const navigate = useNavigate();
 
     const [users, setUsers] = useState([]);
 
@@ -19,6 +23,14 @@ export default function AdminUsers() {
     };
 
     return (
+        <div className="admin-page">
+            <button
+                className="btn admin-back"
+                onClick={() => navigate("/admin")}
+            >
+                ← Back to admin control panel
+            </button>
+
         <div className="dashboard-grid">
 
             <div className="dashboard-left">
@@ -30,16 +42,36 @@ export default function AdminUsers() {
 
                         <thead>
                         <tr>
+                            <th>Name</th>
                             <th>Email</th>
+                            <th>Vehicle</th>
                             <th>Role</th>
                         </tr>
                         </thead>
 
                         <tbody>
+
                         {users.map((user) => (
                             <tr key={user.id}>
+
+                                <td>{user.username}</td>
+
                                 <td>{user.email}</td>
+
+                                <td>
+                                    {user.vehicles && user.vehicles.length > 0 ? (
+                                        user.vehicles.map(v => (
+                                            <span className="vehicle-badge" key={v.id}>
+                                                {v.brand} {v.model}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        "No vehicles"
+                                    )}
+                                </td>
+
                                 <td>{user.role}</td>
+
                             </tr>
                         ))}
                         </tbody>
@@ -50,6 +82,7 @@ export default function AdminUsers() {
 
             </div>
 
+        </div>
         </div>
     );
 }
