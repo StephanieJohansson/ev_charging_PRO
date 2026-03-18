@@ -26,11 +26,21 @@ public class AdminController {
         this.userRepository = userRepository;
     }
 
+    // * USERS *
+
     // let admin see all users
     @GetMapping("/users")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // * STATIONS *
 
     // let admin create new stations
     @PostMapping("/stations")

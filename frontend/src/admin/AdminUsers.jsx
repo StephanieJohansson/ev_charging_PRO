@@ -22,6 +22,19 @@ export default function AdminUsers() {
         }
     };
 
+    const handleDelete = async (userId) => {
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+        api.delete(`/admin/users/${userId}`)
+            .then(() => {
+                setUsers(users.filter(user => user.id !== userId));
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Could not delete user");
+            });
+    };
+
     return (
         <div className="admin-page">
             <button
@@ -53,9 +66,7 @@ export default function AdminUsers() {
 
                         {users.map((user) => (
                             <tr key={user.id}>
-
                                 <td>{user.username}</td>
-
                                 <td>{user.email}</td>
 
                                 <td>
@@ -72,6 +83,14 @@ export default function AdminUsers() {
 
                                 <td>{user.role}</td>
 
+                                <td>
+                                    <button
+                                        className="btn"
+                                        onClick={() => handleDelete(user.id)}
+                                    >
+                                        🗑 Delete
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                         </tbody>

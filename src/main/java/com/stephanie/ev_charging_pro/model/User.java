@@ -23,6 +23,11 @@ public class User {
     private String email;
     private String password;
 
+    @Column(nullable = true)
+    private String fullName;
+    @Column(nullable = true)
+    private String phoneNumber;
+
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Vehicle> vehicles;
 }
