@@ -16,10 +16,6 @@ jobs:
   build-frontend:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

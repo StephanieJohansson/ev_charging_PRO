@@ -24,4 +24,4 @@ jobs:
 
 
       - name: Build and test
-        run: mvc clean verify
+        run: bash mvnw clean verify
