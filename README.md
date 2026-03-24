@@ -4,6 +4,8 @@ Examensarbete (YH MU24) – en webbaserad simulator för köer och laddning vid 
 Backend: Spring Boot + MySQL. Frontend: React.  
 
 > OBS: README uppdateras när projektet är färdigt.
+>
+> [![Backend CI](https://github.com/StephanieJohansson/ev_charging_PRO/actions/workflows/backend.yml/badge.svg)](https://github.com/StephanieJohansson/ev_charging_PRO/actions/workflows/backend.yml)
 
 
 # POSTMAN
