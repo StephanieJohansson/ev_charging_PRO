@@ -4,6 +4,7 @@ package com.stephanie.ev_charging_pro.controller;
 import com.stephanie.ev_charging_pro.dto.AuthResponse;
 import com.stephanie.ev_charging_pro.dto.LoginRequest;
 import com.stephanie.ev_charging_pro.dto.RegisterRequest;
+import com.stephanie.ev_charging_pro.dto.UpdateProfileDTO;
 import com.stephanie.ev_charging_pro.model.User;
 import com.stephanie.ev_charging_pro.repository.UserRepository;
 import com.stephanie.ev_charging_pro.service.AuthService;

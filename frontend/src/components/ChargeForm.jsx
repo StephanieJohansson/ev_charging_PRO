@@ -36,7 +36,9 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
     }, [preselectedStationId]);
 
     useEffect(() => {
-        api.get("/stations").then(res => setStations(res.data));
+        api.get("/stations")
+            .then(res => setStations(res.data))
+            .catch(() => setError("Could not load stations"));
 
         api.get("/charging/active")
             .then(res => setActiveSession(res.data))
@@ -47,13 +49,20 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
     useEffect(() => {
         if (!activeSession || estimatedMinutes) return;
 
+        const vehicleIdFromSession = activeSession.vehicleId ?? activeSession.vehicle?.id;
+        const stationIdFromSession = activeSession.stationId ?? activeSession.station?.id;
+
+        if (!vehicleIdFromSession || !stationIdFromSession) return;
+
         api.post("/charging/estimate", {
-            vehicleId: activeSession.vehicle.id,
-            stationId: activeSession.station.id,
+            vehicleId: vehicleIdFromSession,
+            stationId: stationIdFromSession,
             startPercentage: activeSession.startPercentage,
             endPercentage: activeSession.endPercentage
         }).then(res => {
             setEstimatedMinutes(res.data.totalTimeMinutes);
+        }).catch(() => {
+            setError("Could not restore charging estimate");
         });
     }, [activeSession, estimatedMinutes]);
 
@@ -71,22 +80,23 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
             elapsed += TIME_SCALE;
 
             const ratio = Math.min(elapsed / estimatedMinutes, 1);
-            const current =
-                startPct + (endPct - startPct) * ratio;
+            const current = startPct + (endPct - startPct) * ratio;
 
             setCurrentPercentage(Math.round(current));
-            setRemainingMinutes(
-                Math.max(0, Math.round(estimatedMinutes - elapsed))
-            );
+            setRemainingMinutes(Math.max(0, Math.round(estimatedMinutes - elapsed)));
 
             if (ratio >= 1) {
                 clearInterval(interval);
                 setShowComplete(true);
 
-                await api.post("/charging/stop", {
-                    sessionId: activeSession.id,
-                    endPercentage: endPct
-                });
+                try {
+                    await api.post("/charging/stop", {
+                        sessionId: activeSession.id,
+                        endPercentage: endPct
+                    });
+                } catch {
+                    setError("Could not stop charging automatically");
+                }
 
                 setTimeout(() => {
                     setShowComplete(false);
@@ -94,20 +104,32 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
                     setEstimatedMinutes(null);
                     setCurrentPercentage(null);
                     setRemainingMinutes(null);
-
-                    onSessionFinished?.(); // 🔁 dashboard reload
+                    setPreview(null);
+                    onSessionFinished?.();
                 }, 2000);
             }
         }, TICK_MS);
 
         return () => clearInterval(interval);
-    }, [activeSession, estimatedMinutes]);
+    }, [activeSession, estimatedMinutes, onSessionFinished]);
 
     /* ---------------- ACTIONS ---------------- */
 
     const estimate = async (e) => {
         e.preventDefault();
         setError(null);
+
+        if (!vehicleId || !stationId) {
+            setError("Please select both vehicle and station");
+            return;
+        }
+
+        if (start >= end) {
+            setError("Start percentage must be lower than end percentage");
+            return;
+        }
+
+        setLoading(true);
 
         try {
             const res = await api.post("/charging/estimate", {
@@ -121,6 +143,8 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
             setEstimatedMinutes(res.data.totalTimeMinutes);
         } catch {
             setError("Could not estimate charging");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -128,33 +152,46 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
         setLoading(true);
         setError(null);
 
-        const res = await api.post("/charging/start", {
-            vehicleId,
-            stationId,
-            startPercentage: start,
-            targetPercentage: end
-        });
+        try {
+            const res = await api.post("/charging/start", {
+                vehicleId,
+                stationId,
+                startPercentage: start,
+                endPercentage: end
+            });
 
-        setActiveSession(res.data);
-        setPreview(null);
-        setLoading(false);
+            setActiveSession(res.data);
+            setPreview(null);
+        } catch {
+            setError("Could not start charging");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const stopCharging = async () => {
+        if (!activeSession) return;
+
         setLoading(true);
+        setError(null);
 
-        await api.post("/charging/stop", {
-            sessionId: activeSession.id,
-            endPercentage: currentPercentage ?? end
-        });
+        try {
+            await api.post("/charging/stop", {
+                sessionId: activeSession.id,
+                endPercentage: currentPercentage ?? end
+            });
 
-        setActiveSession(null);
-        setEstimatedMinutes(null);
-        setCurrentPercentage(null);
-        setRemainingMinutes(null);
-        setLoading(false);
-
-        onSessionFinished?.();
+            setActiveSession(null);
+            setEstimatedMinutes(null);
+            setCurrentPercentage(null);
+            setRemainingMinutes(null);
+            setPreview(null);
+            onSessionFinished?.();
+        } catch {
+            setError("Could not stop charging");
+        } finally {
+            setLoading(false);
+        }
     };
 
     /* ---------------- UI ---------------- */
@@ -166,7 +203,12 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
 
             {!activeSession && (
                 <form onSubmit={estimate} className="form">
-                    <select required value={vehicleId} onChange={e => setVehicleId(e.target.value)}>
+                    <select
+                        required
+                        value={vehicleId}
+                        onChange={e => setVehicleId(e.target.value)}
+                        disabled={loading}
+                    >
                         <option value="">Select vehicle</option>
                         {vehicles.map(v => (
                             <option key={v.id} value={v.id}>
@@ -175,7 +217,12 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
                         ))}
                     </select>
 
-                    <select required value={stationId} onChange={e => setStationId(e.target.value)}>
+                    <select
+                        required
+                        value={stationId}
+                        onChange={e => setStationId(e.target.value)}
+                        disabled={loading}
+                    >
                         <option value="">Select station</option>
                         {stations.map(s => (
                             <option key={s.id} value={s.id}>
@@ -185,11 +232,27 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
                     </select>
 
                     <div className="row">
-                        <input type="number" value={start} onChange={e => setStart(+e.target.value)} />
-                        <input type="number" value={end} onChange={e => setEnd(+e.target.value)} />
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={start}
+                            onChange={e => setStart(Number(e.target.value))}
+                            disabled={loading}
+                        />
+                        <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={end}
+                            onChange={e => setEnd(Number(e.target.value))}
+                            disabled={loading}
+                        />
                     </div>
 
-                    <button className="btn">Estimate charging</button>
+                    <button className="btn" disabled={loading}>
+                        {loading ? "Estimating..." : "Estimate charging"}
+                    </button>
                 </form>
             )}
 
@@ -198,11 +261,11 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
                     <p>Queue: {preview.queueTimeMinutes} min</p>
                     <p>Charging: {preview.chargingTimeMinutes} min</p>
                     <strong>Total: {preview.totalTimeMinutes} min</strong>
-                    <p>⚡ {preview.estimatedEnergyKWh.toFixed(2)} kWh</p>
-                    <p>💰 {preview.estimatedCost.toFixed(2)} kr</p>
+                    <p>⚡ {preview?.estimatedEnergyKWh?.toFixed(2)} kWh</p>
+                    <p>💰 {preview?.estimatedCost?.toFixed(2)} kr</p>
 
-                    <button className="btn" onClick={startCharging}>
-                        🔌 Start charging
+                    <button className="btn" onClick={startCharging} disabled={loading}>
+                        {loading ? "Starting..." : "🔌 Start charging"}
                     </button>
                 </>
             )}
@@ -214,18 +277,18 @@ export default function ChargeForm({ vehicles, onSessionFinished, preselectedSta
                         max={activeSession.endPercentage}
                     />
 
-                    <p>{currentPercentage ?? activeSession.startPercentage}% → {activeSession.endPercentage}%</p>
+                    <p>
+                        {currentPercentage ?? activeSession.startPercentage}% → {activeSession.endPercentage}%
+                    </p>
                     <p>⏱ {remainingMinutes} min left</p>
 
-                    <button className="btn danger" onClick={stopCharging}>
-                        Stop charging
+                    <button className="btn danger" onClick={stopCharging} disabled={loading}>
+                        {loading ? "Stopping..." : "Stop charging"}
                     </button>
                 </>
             )}
 
-            {showComplete && (
-                <p className="success">✅ Charging complete</p>
-            )}
+            {showComplete && <p className="success">✅ Charging complete</p>}
         </div>
     );
 }
