@@ -101,3 +101,4 @@ POST a car logged in as a user (/vehicles):
 - User profile page
 - Improved formatting of estimated queue and charging time
 - More accurate estimation of waiting time
+- Login-page UI
