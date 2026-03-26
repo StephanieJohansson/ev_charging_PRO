@@ -116,7 +116,7 @@ public class SimulationService {
         double erlangC =
                 (Math.pow(lambda/mu, c) / (factorial(c) * (1 - rho))) * p0;
 
-        // Använd setters här nere också!
+
         r.setWq((erlangC * (1 / mu)) / (c * (1 - rho)));
         r.setW(r.getWq() + (1 / mu));
         r.setLq(r.getWq() * lambda);

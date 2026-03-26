@@ -56,17 +56,19 @@ export default function Stations() {
                             </div>
 
                             {/* ACTION */}
-                            <button
-                                className="station-action"
-                                onClick={() =>
-                                    navigate("/dashboard", {
-                                        state: { stationId: s.id }
-                                    })
-                                }
-                                title="Charge here"
-                            >
-                                🔌 Charge here
-                            </button>
+                            {user?.role !== "ADMIN" && (
+                                <button
+                                    className="station-action"
+                                    onClick={() =>
+                                        navigate('/dashboard', {
+                                            state: { stationId: s.id }
+                                        })
+                                    }
+                                    title="Charge here"
+                                >
+                                    🔌 Charge here
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

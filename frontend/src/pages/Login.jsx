@@ -2,22 +2,21 @@ import { useState, useContext } from 'react';
 import api from '../api/api';
 import { AuthContext } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import "../Styles/Login.css";
 
-
-// Login component for user authentication
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    // Handle form submission for login
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Send login request to backend API
+
         try {
             const response = await api.post('/auth/login', { email, password });
             console.log("LOGIN RESPONSE: ", response.data);
+
             const { token, role } = response.data;
             login(token, role);
 
@@ -32,18 +31,34 @@ export default function Login() {
         }
     };
 
-    // Render login form
     return (
-        <form onSubmit={handleSubmit}>
-            <h2>Login</h2>
-            <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-            <button>Login</button>
-        </form>
+        <div className="login-container">
+            <form className="login-card" onSubmit={handleSubmit}>
+                <h2>Login</h2>
+
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                />
+
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                />
+
+                <button type="submit">Login</button>
+
+                <p style={{ textAlign: "center", marginTop: "10px", color: "#ccc" }}>
+                    No account yet?{" "}
+                    <a href="/register" style={{ color: "#2ecc71" }}>
+                        Register here
+                    </a>
+                </p>
+            </form>
+        </div>
     );
-    <p>
-        No account yet? <a href="/register">Register here</a>
-    </p>
 }
-
-
